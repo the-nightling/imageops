@@ -26,6 +26,8 @@ public:
     Image & operator = (Image &&rhs);
     ~Image();
 
+    //Image & operator + (const Image &lhs, const Image &rhs);
+
     void copy(const Image &rhs);
 
     class iterator
@@ -62,7 +64,7 @@ public:
 
         bool operator != (const iterator &rhs)
         {
-            return *ptr == *rhs.ptr;
+            return ptr != rhs.ptr;
         }
     };
 

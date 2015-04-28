@@ -10,9 +10,6 @@ Image::Image(int width, int height)
     this->size = width*height;
 
     data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
-    for(int i = 0; i < size; i++) {
-        data[i] = ' ';
-    }
 }
 
 Image::Image(std::string filename)
@@ -54,9 +51,12 @@ Image::Image(const Image &rhs)
     , maxGrayVal(rhs.maxGrayVal)
 {
     data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
+    this->copy(rhs);
+    /*
     for(int i = 0; i < size; i++) {
         data[i] = rhs.data[i];
     }
+    //*/
 }
 
 Image::Image(Image &&rhs)
@@ -78,9 +78,12 @@ Image & Image::operator = (const Image &rhs)
         size = rhs.size;
         maxGrayVal = rhs.maxGrayVal;
         data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
+        this->copy(rhs);
+        /*
         for(int i = 0; i < size; i++) {
             data[i] = rhs.data[i];
         }
+        //*/
     }
 
     return *this;
@@ -119,8 +122,6 @@ void Image::copy(const Image &rhs)
     size = rhs.size;
     maxGrayVal = rhs.maxGrayVal;
 
-    this->copy(rhs);
-
     Image::iterator beg = this->begin(), end = this->end();
     Image::iterator inStart = rhs.begin(), inEnd = rhs.end();
 
@@ -130,3 +131,10 @@ void Image::copy(const Image &rhs)
         ++beg; ++inStart;
     }
 }
+
+/*
+Image & Image::operator + (const Image &lhs, const Image &rhs)
+{
+
+}
+//*/
