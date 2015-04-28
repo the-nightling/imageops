@@ -26,7 +26,7 @@ public:
     Image & operator = (Image &&rhs);
     ~Image();
 
-    //Image & operator + (const Image &lhs, const Image &rhs);
+    Image & operator += (const Image &rhs);
 
     void copy(const Image &rhs);
 

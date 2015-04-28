@@ -52,11 +52,6 @@ Image::Image(const Image &rhs)
 {
     data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
     this->copy(rhs);
-    /*
-    for(int i = 0; i < size; i++) {
-        data[i] = rhs.data[i];
-    }
-    //*/
 }
 
 Image::Image(Image &&rhs)
@@ -79,11 +74,6 @@ Image & Image::operator = (const Image &rhs)
         maxGrayVal = rhs.maxGrayVal;
         data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
         this->copy(rhs);
-        /*
-        for(int i = 0; i < size; i++) {
-            data[i] = rhs.data[i];
-        }
-        //*/
     }
 
     return *this;
@@ -116,12 +106,6 @@ Image::iterator Image::end() const
 
 void Image::copy(const Image &rhs)
 {
-    fileType = rhs.fileType;
-    width = rhs.width;
-    height = rhs.height;
-    size = rhs.size;
-    maxGrayVal = rhs.maxGrayVal;
-
     Image::iterator beg = this->begin(), end = this->end();
     Image::iterator inStart = rhs.begin(), inEnd = rhs.end();
 
@@ -132,9 +116,34 @@ void Image::copy(const Image &rhs)
     }
 }
 
-/*
-Image & Image::operator + (const Image &lhs, const Image &rhs)
+//*
+Image & Image::operator += (const Image &rhs)
 {
+    Image::iterator beg = this->begin(), end = this->end();
+    Image::iterator inStart = rhs.begin();
 
+    while(beg != end)
+    {
+        *beg += *inStart;
+        ++beg; ++inStart;
+    }
+
+    return *this;
 }
+
+Image operator + (const Image &rhs, const Image &lhs)
+{
+    Image result = lhs;
+    Image::iterator beg = result.begin(), end = result.end();
+    Image::iterator inStart = rhs.begin();
+
+    while(beg != end)
+    {
+        *beg += *inStart;
+        ++beg; ++inStart;
+    }
+
+    return result;
+}
+
 //*/

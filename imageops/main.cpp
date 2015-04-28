@@ -7,10 +7,7 @@ using namespace::std;
 int main(int argc, char* argv[]) {
 
     Image image1(argv[1]);
-    //Image image2(image1.width, image1.height);
     Image image2(image1);
-
-    //image2.copy(image1);
 
     //*
     // write a new P2 binary ascii image
