@@ -35,6 +35,8 @@ public:
     Image & operator ! ();      // invert operator
     Image & operator += (const Image &rhs);     // addition assignment operator
     Image & operator -= (const Image &rhs);     // subtraction assignment operator
+    Image operator / (const Image &rhs);    // mask operator
+    Image operator * (int f);   // threshold operator
 
     // GETTERS
     int getWidth() const;

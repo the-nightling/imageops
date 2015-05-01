@@ -18,13 +18,18 @@ using namespace::global;
 
 int main(int argc, char* argv[]) {
 
-    /*
-    Image image1("Lenna_hat_mask-1.pgm");  // create an image object from file with filename from command line
-    Image image2(image1);
+    //*
+    Image image1("Lenna_standard-1.pgm");
+    //Image image2("Lenna_hat_mask-1.pgm");  // create an image object from file with filename from command line
+
+    //unsigned char *data = new unsigned char [512*512];
+    //Image image3(512, 512, 255, data);      // create an image object with empty data
+
+    Image image3(image1 * 190);
 
     // save the copied image object to a file
     ofstream ostr("image_copy.pgm", std::ios::binary);
-    ostr << image2;
+    ostr << image3;
     ostr.close();
     //*/
 
@@ -133,4 +138,18 @@ TEST_CASE("subtract", "[subtract]")
 
     // test
     REQUIRE(imageIsBlack);
+}
+
+TEST_CASE("mask_threshold", "[mask][threshold]")
+{
+    Image U1("Lenna_standard-1.pgm");    // create an image object from file
+    Image M1(U1 * 150);     // create mask via thresholding
+    Image M2(M1);           // copy mask
+    !M2;                    // invert mask copy
+    Image R1(U1/M1);        // create masked image 1
+    Image R2(U1/M2);        // create masked image 2
+    Image U2(R1+R2);        // adding the two masked images gives the original image
+
+    // test
+    REQUIRE(U1 == U2);
 }

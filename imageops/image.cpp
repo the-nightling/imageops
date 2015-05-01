@@ -50,8 +50,10 @@ Image::Image(Image &&rhs)
     , height(std::move(rhs.height))
     , size(std::move(rhs.size))
     , maxGrayVal(std::move(rhs.maxGrayVal))
-    , data(std::move(rhs.data))
-{}
+{
+    data = std::unique_ptr<unsigned char[]>(new unsigned char[rhs.size]);
+    data = std::move(rhs.data);
+}
 
 // copy assignment operator
 Image & Image::operator = (const Image &rhs)
@@ -73,12 +75,16 @@ Image & Image::operator = (const Image &rhs)
 // move assignment operator
 Image & Image::operator = (Image &&rhs)
 {
-    fileType = std::move(rhs.fileType);
-    width = std::move(rhs.width);
-    height = std::move(rhs.height);
-    size = std::move(rhs.size);
-    maxGrayVal = std::move(rhs.maxGrayVal);
-    data = std::move(rhs.data);
+    if(this != &rhs)
+    {
+        fileType = std::move(rhs.fileType);
+        width = std::move(rhs.width);
+        height = std::move(rhs.height);
+        size = std::move(rhs.size);
+        maxGrayVal = std::move(rhs.maxGrayVal);
+        data = std::unique_ptr<unsigned char[]>(new unsigned char[rhs.size]);
+        data = std::move(rhs.data);
+    }
 
     return *this;
 }
@@ -138,7 +144,6 @@ std::ostream & operator << (std::ostream & os, const Image & image)
 bool Image::operator == (const Image &rhs)
 {
     if(
-            this->getFileType() != rhs.getFileType() ||
             this->getHeight() != rhs.getHeight() ||
             this->getWidth() != rhs.getWidth() ||
             this->getSize() != rhs.getSize() ||
@@ -185,20 +190,27 @@ Image & Image::operator ! ()
 // addition assignment operator
 Image & Image::operator += (const Image &rhs)
 {
-    Image::iterator beg = this->begin(), end = this->end();
-    Image::iterator inStart = rhs.begin();
-
-    while(beg != end)
+    try
     {
-        if(*beg + *inStart > 255)
-        {
-            *beg = (unsigned char) 255;
-        }
-        else{
-            *beg += *inStart;
-        }
+        if(this->size != rhs.size) throw "Image size not equal.";
 
-        ++beg; ++inStart;
+        Image::iterator beg = this->begin(), end = this->end();
+        Image::iterator inStart = rhs.begin();
+
+        while(beg != end)
+        {
+            if(*beg + *inStart > 255)
+            {
+                *beg = (unsigned char) 255;
+            }
+            else{
+                *beg += *inStart;
+            }
+
+            ++beg; ++inStart;
+        }
+    } catch(const char *msg) {
+        std::cerr << msg << std::endl;
     }
 
     return *this;
@@ -207,23 +219,83 @@ Image & Image::operator += (const Image &rhs)
 // subtraction assignment operator
 Image & Image::operator -= (const Image &rhs)
 {
-    Image::iterator beg = this->begin(), end = this->end();
-    Image::iterator inStart = rhs.begin();
-
-    while(beg != end)
+    try
     {
-        if(*beg - *inStart < 0)
-        {
-            *beg = (unsigned char) 0;
-        }
-        else{
-            *beg -= *inStart;
-        }
+        if(this->size != rhs.size) throw "Image size not equal.";
 
-        ++beg; ++inStart;
+        Image::iterator beg = this->begin(), end = this->end();
+        Image::iterator inStart = rhs.begin();
+
+        while(beg != end)
+        {
+            if(*beg - *inStart < 0)
+            {
+                *beg = (unsigned char) 0;
+            }
+            else{
+                *beg -= *inStart;
+            }
+
+            ++beg; ++inStart;
+        }
+    } catch(const char *msg) {
+        std::cerr << msg << std::endl;
     }
 
     return *this;
+}
+
+// mask operator
+Image Image::operator / (const Image &rhs)
+{
+    unsigned char *tempData = new unsigned char [rhs.size];
+    Image result(rhs.width, rhs.height, rhs.maxGrayVal, tempData);
+
+    Image::iterator beg = this->begin(), end = this->end();
+    Image::iterator inStart = rhs.begin();
+    Image::iterator resultStart = result.begin();
+
+    while(beg != end)
+    {
+        if(*inStart == 255)
+        {
+            *resultStart = *beg;
+        }
+        else
+        {
+            *resultStart = 0;
+        }
+
+        ++beg; ++inStart; ++resultStart;
+    }
+
+    return result;
+}
+
+// threshold operator
+Image Image::operator *(int f)
+{
+    unsigned char *tempData = new unsigned char [size];
+    Image result(width, height, maxGrayVal, tempData);
+
+    Image::iterator beg = this->begin(), end = this->end();
+    Image::iterator resultStart = result.begin();
+
+    while(beg != end)
+    {
+        if(*beg > f)
+        {
+            *resultStart = 255;
+        }
+        else
+        {
+            *resultStart = 0;
+        }
+
+        ++beg; ++resultStart;
+    }
+
+    return result;
 }
 
 // addition operator (relies on addition assignment operator)
