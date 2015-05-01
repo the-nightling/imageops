@@ -18,21 +18,6 @@ using namespace::global;
 
 int main(int argc, char* argv[]) {
 
-    //*
-    Image image1("Lenna_standard-1.pgm");
-    //Image image2("Lenna_hat_mask-1.pgm");  // create an image object from file with filename from command line
-
-    //unsigned char *data = new unsigned char [512*512];
-    //Image image3(512, 512, 255, data);      // create an image object with empty data
-
-    Image image3(image1 * 190);
-
-    // save the copied image object to a file
-    ofstream ostr("image_copy.pgm", std::ios::binary);
-    ostr << image3;
-    ostr.close();
-    //*/
-
     // run unit tests
     Catch::Session().run();
 
@@ -140,15 +125,26 @@ TEST_CASE("subtract", "[subtract]")
     REQUIRE(imageIsBlack);
 }
 
+TEST_CASE("save_load", "[save][load]")
+{
+    Image image1;
+    image1.load("Lenna_standard-1.pgm");
+    image1.save("image_copy.pgm");
+
+    // test
+    REQUIRE(image1.getSize() != 0);
+}
+
 TEST_CASE("mask_threshold", "[mask][threshold]")
 {
-    Image U1("Lenna_standard-1.pgm");    // create an image object from file
-    Image M1(U1 * 150);     // create mask via thresholding
-    Image M2(M1);           // copy mask
-    !M2;                    // invert mask copy
-    Image R1(U1/M1);        // create masked image 1
-    Image R2(U1/M2);        // create masked image 2
-    Image U2(R1+R2);        // adding the two masked images gives the original image
+    Image U1("Lenna_standard-1.pgm");   // create an image object from file
+    Image M1(U1 * 150);                 // create a mask via thresholding
+    Image M2(M1);                       // copy the mask
+    !M2;                                // invert the mask copy
+    Image R1(U1/M1);                    // create masked image 1 using the mask
+    Image R2(U1/M2);                    // create masked image 2 using the inverted mask
+    Image U2(R1+R2);                    // adding the two masked images gives the original image
+    U2.save("mask_threshold_test.pgm"); // save the image to file
 
     // test
     REQUIRE(U1 == U2);

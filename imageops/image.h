@@ -21,6 +21,7 @@ private:
     std::unique_ptr<unsigned char[]> data;
 
 public:
+    Image();    // default constructor
     Image(int width, int height, int maxGrayVal, unsigned char data[]);     // constructor
     Image(std::string filename);                // constructor
     Image(const Image &rhs);                    // copy constructor
@@ -47,6 +48,8 @@ public:
 
     // METHODS
     void copy(const Image &rhs);
+    Image & load(std::string filename);
+    void save(std::string filename);
 
     // inner iterator class
     class iterator
@@ -102,6 +105,5 @@ public:
 
 Image operator + (const Image &lhs, const Image &rhs);
 Image operator - (const Image &lhs, const Image &rhs);
-
 }
 #endif // IMAGE_H

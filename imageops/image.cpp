@@ -5,9 +5,21 @@
 
 namespace global{
 
+// default constructor
+Image::Image()
+{
+    this->fileType = "P5";
+    this->width = 0;
+    this->height = 0;
+    this->size = 0;
+    this->maxGrayVal = 0;
+    this->data = nullptr;
+}
+
 // constructor (if image properties and data available)
 Image::Image(int width, int height, int maxGrayVal, unsigned char data[])
 {
+    this->fileType = "P5";
     this->width = width;
     this->height = height;
     this->size = width*height;
@@ -332,6 +344,45 @@ void Image::copy(const Image &rhs)
         *beg = *inStart;
         ++beg; ++inStart;
     }
+}
+
+// Method to load an image from file
+Image & Image::load(std::string filename)
+{
+    try{
+    // open file stream in binary mode
+    std::ifstream inputFileStream(filename, std::ios::binary);
+
+    if(inputFileStream)
+    {
+        // parse file stream into image object
+        inputFileStream >> *this;
+
+        // close filestream
+        inputFileStream.close();
+    }
+    else
+    {
+        throw "Error opening file.";
+    }
+
+    } catch(const char *msg) {
+        std::cerr << msg << std::endl;
+    }
+    return *this;
+}
+
+// Method to save an image to file
+void Image::save(std::string filename)
+{
+    // open filestream in binary mode
+    std::ofstream ostr(filename, std::ios::binary);
+
+    // write image object into filestream
+    ostr << *this;
+
+    // close filestream
+    ostr.close();
 }
 
 // ITERATOR ACCESS METHODS
