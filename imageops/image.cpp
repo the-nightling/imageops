@@ -98,6 +98,7 @@ std::istream & operator >> (std::istream & is, Image & image)
     is >> std::ws;
     is >> image.height >> image.width >> image.maxGrayVal;
     image.size = image.width*image.height;
+    is >> std::ws;
 
     // check data (comment out as necessary)
     /*
@@ -127,18 +128,126 @@ std::ostream & operator << (std::ostream & os, const Image & image)
 
     // write data
     for(int i = 0; i < image.size; i++) {
-            os << (unsigned char)image.data[i];
+        os << (unsigned char)image.data[i];
     }
 
     return os;
 }
 
+// equality operator
+bool Image::operator == (const Image &rhs)
+{
+    if(
+            this->getFileType() != rhs.getFileType() ||
+            this->getHeight() != rhs.getHeight() ||
+            this->getWidth() != rhs.getWidth() ||
+            this->getSize() != rhs.getSize() ||
+            this->getMaxGrayVal() != rhs.getMaxGrayVal()
+            )
+    {
+        return false;
+    }
+    else
+    {
+        bool result = true;
+        Image::iterator beg = this->begin(), end = this->end();
+        Image::iterator inStart = rhs.begin();
+
+        while(beg != end)
+        {
+            if(*beg != *inStart)
+            {
+                result = false;
+            }
+
+            ++beg; ++inStart;
+        }
+
+        return result;
+    }
+
+}
+
+// invert operator
+Image & Image::operator ! ()
+{
+    Image::iterator beg = this->begin(), end = this->end();
+
+    while(beg != end)
+    {
+        *beg = 255 - *beg;
+        ++beg;
+    }
+
+    return *this;
+}
+
+// addition assignment operator
+Image & Image::operator += (const Image &rhs)
+{
+    Image::iterator beg = this->begin(), end = this->end();
+    Image::iterator inStart = rhs.begin();
+
+    while(beg != end)
+    {
+        if(*beg + *inStart > 255)
+        {
+            *beg = (unsigned char) 255;
+        }
+        else{
+            *beg += *inStart;
+        }
+
+        ++beg; ++inStart;
+    }
+
+    return *this;
+}
+
+// subtraction assignment operator
+Image & Image::operator -= (const Image &rhs)
+{
+    Image::iterator beg = this->begin(), end = this->end();
+    Image::iterator inStart = rhs.begin();
+
+    while(beg != end)
+    {
+        if(*beg - *inStart < 0)
+        {
+            *beg = (unsigned char) 0;
+        }
+        else{
+            *beg -= *inStart;
+        }
+
+        ++beg; ++inStart;
+    }
+
+    return *this;
+}
+
+// addition operator (relies on addition assignment operator)
+Image operator + (const Image &lhs, const Image &rhs)
+{
+    Image result = lhs;
+
+    return result += rhs;
+}
+
+// subtraction operator (relies on subtraction assignment operator)
+Image operator - (const Image &lhs, const Image &rhs)
+{
+    Image result = lhs;
+
+    return result -= rhs;
+}
+
 // GETTERS
-int Image::getWidth(){return this->width;}
-int Image::getHeight(){return this->height;}
-int Image::getSize(){return this->size;}
-int Image::getMaxGrayVal(){return this->maxGrayVal;}
-std::string Image::getFileType(){return this->fileType;}
+int Image::getWidth() const {return this->width;}
+int Image::getHeight() const {return this->height;}
+int Image::getSize() const {return this->size;}
+int Image::getMaxGrayVal() const {return this->maxGrayVal;}
+std::string Image::getFileType() const {return this->fileType;}
 
 // Method to deep copy data from an image object (uses iterators)
 void Image::copy(const Image &rhs)
@@ -151,37 +260,6 @@ void Image::copy(const Image &rhs)
         *beg = *inStart;
         ++beg; ++inStart;
     }
-}
-
-// addition assignment operator
-Image & Image::operator += (const Image &rhs)
-{
-    Image::iterator beg = this->begin(), end = this->end();
-    Image::iterator inStart = rhs.begin();
-
-    while(beg != end)
-    {
-        *beg += *inStart;
-        ++beg; ++inStart;
-    }
-
-    return *this;
-}
-
-// addition operator (relies on addition assignment operator)
-Image operator + (const Image &rhs, const Image &lhs)
-{
-    Image result = lhs;
-    Image::iterator beg = result.begin(), end = result.end();
-    Image::iterator inStart = rhs.begin();
-
-    while(beg != end)
-    {
-        *beg += *inStart;
-        ++beg; ++inStart;
-    }
-
-    return result;
 }
 
 // ITERATOR ACCESS METHODS

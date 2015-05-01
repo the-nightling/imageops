@@ -31,14 +31,17 @@ public:
 
     friend std::ostream & operator << (std::ostream & os, const Image & image);     // input assignment operator
     friend std::istream & operator >> (std::istream & is, Image & image);           // output assignment operator
+    bool operator == (const Image &rhs);
+    Image & operator ! ();      // invert operator
     Image & operator += (const Image &rhs);     // addition assignment operator
+    Image & operator -= (const Image &rhs);     // subtraction assignment operator
 
     // GETTERS
-    int getWidth();
-    int getHeight();
-    int getSize();
-    int getMaxGrayVal();
-    std::string getFileType();
+    int getWidth() const;
+    int getHeight() const;
+    int getSize() const;
+    int getMaxGrayVal() const;
+    std::string getFileType() const;
 
     // METHODS
     void copy(const Image &rhs);
@@ -94,6 +97,9 @@ public:
     iterator begin(void) const;
     iterator end(void) const;
 };
+
+Image operator + (const Image &lhs, const Image &rhs);
+Image operator - (const Image &lhs, const Image &rhs);
 
 }
 #endif // IMAGE_H

@@ -18,13 +18,15 @@ using namespace::global;
 
 int main(int argc, char* argv[]) {
 
-    Image image1(argv[1]);  // create an image object from file with filename from command line
-    Image image2(image1);   // create a copy of the image object
+    /*
+    Image image1("Lenna_hat_mask-1.pgm");  // create an image object from file with filename from command line
+    Image image2(image1);
 
     // save the copied image object to a file
     ofstream ostr("image_copy.pgm", std::ios::binary);
     ostr << image2;
     ostr.close();
+    //*/
 
     // run unit tests
     Catch::Session().run();
@@ -50,11 +52,7 @@ TEST_CASE("copy_constructor", "[copy_constructor]")
     Image image2(image1);   // create a copy of the image object
 
     // test
-    REQUIRE(image1.getFileType() == image2.getFileType());
-    REQUIRE(image1.getHeight() == image2.getHeight());
-    REQUIRE(image1.getWidth() == image2.getWidth());
-    REQUIRE(image1.getSize() == image2.getSize());
-    REQUIRE(image1.getMaxGrayVal() == image2.getMaxGrayVal());
+    REQUIRE(image1 == image2);
 }
 
 TEST_CASE("copy_assignment", "[copy_assignment]")
@@ -67,11 +65,72 @@ TEST_CASE("copy_assignment", "[copy_assignment]")
     image2 = image1;    // copy assign image
 
     // test
-    REQUIRE(image1.getFileType() == image2.getFileType());
-    REQUIRE(image1.getHeight() == image2.getHeight());
-    REQUIRE(image1.getWidth() == image2.getWidth());
-    REQUIRE(image1.getSize() == image2.getSize());
-    REQUIRE(image1.getMaxGrayVal() == image2.getMaxGrayVal());
+    REQUIRE(image1 == image2);
 
     free(data);
+}
+
+TEST_CASE("invert", "[invert]")
+{
+    Image image1("Lenna_standard-1.pgm");    // create an image object from file
+    Image image2(image1);   // create a copy of the image object
+    !image2;    // invert the copied image
+    !image2;    // invert the copied image a second time
+
+    // test
+    REQUIRE(image1 == image2);
+}
+
+TEST_CASE("add", "[add]")
+{
+    //*
+    Image image1("Lenna_standard-1.pgm");    // create an image object from file
+    Image image2(image1);   // create a copy of the image object
+
+    !image2;    // invert the copied image
+
+    unsigned char *data = new unsigned char [512*512];
+    Image image3(512, 512, 255, data);      // create an image object with empty data
+
+    // adding an image with its mask will give a white image (all values are 255)
+    image3 = image1 + image2;
+
+    bool imageIsWhite = true;
+    Image::iterator beg = image3.begin(), end = image3.end();
+    while(beg != end)
+    {
+        if(*beg != 255)
+        {
+            imageIsWhite = false;
+        }
+        ++beg;
+    }
+
+    // test
+    REQUIRE(imageIsWhite);
+}
+
+TEST_CASE("subtract", "[subtract]")
+{
+    Image image1("Lenna_standard-1.pgm");    // create an image object from file
+
+    unsigned char *data = new unsigned char [512*512];
+    Image image3(512, 512, 255, data);      // create an image object with empty data
+
+    // subtracting an image from itself will give a black image (all values are 0)
+    image3 = image1 - image1;
+
+    bool imageIsBlack = true;
+    Image::iterator beg = image3.begin(), end = image3.end();
+    while(beg != end)
+    {
+        if(*beg != 0)
+        {
+            imageIsBlack = false;
+        }
+        ++beg;
+    }
+
+    // test
+    REQUIRE(imageIsBlack);
 }
