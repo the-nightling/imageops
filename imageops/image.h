@@ -11,6 +11,8 @@
 #include <iostream>
 #include <memory>
 
+namespace global{
+
 class Image
 {
 public:
@@ -27,6 +29,7 @@ public:
     ~Image();
 
     Image & operator += (const Image &rhs);
+    friend std::ostream & operator << (std::ostream & os, const Image & image);
 
     void copy(const Image &rhs);
 
@@ -73,4 +76,5 @@ public:
     iterator end(void) const;
 };
 
+}
 #endif // IMAGE_H

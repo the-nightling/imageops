@@ -3,6 +3,8 @@
 #include <sstream>
 #include <fstream>
 
+namespace global{
+
 Image::Image(int width, int height)
 {
     this->width = width;
@@ -96,7 +98,7 @@ Image::~Image()
 
 Image::iterator Image::begin() const
 {
-     return iterator(data.get());
+    return iterator(data.get());
 }
 
 Image::iterator Image::end() const
@@ -146,4 +148,18 @@ Image operator + (const Image &rhs, const Image &lhs)
     return result;
 }
 
+std::ostream & operator << (std::ostream & os, const Image & image)
+{
+    // write header
+    os << "P5\n" << "#\n" << image.width << " " << image.height << "\n" << image.maxGrayVal << std::endl;
+    // write data
+    for(int i = 0; i < image.size; i++) {
+            // print pixel value
+            os << (unsigned char)image.data[i];
+    }
+
+    return os;
+}
+
+}
 //*/
