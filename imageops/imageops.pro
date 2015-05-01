@@ -9,5 +9,6 @@ SOURCES += main.cpp \
     image.cpp
 
 HEADERS += \
-    image.h
+    image.h \
+    catch.hpp
 

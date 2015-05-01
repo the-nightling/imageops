@@ -15,24 +15,35 @@ namespace global{
 
 class Image
 {
-public:
+private:
     std::string fileType;
     int width, height, size, maxGrayVal;
     std::unique_ptr<unsigned char[]> data;
+
 public:
-    Image(int width, int height);
-    Image(std::string filename);
-    Image(const Image &rhs);
-    Image(Image &&rhs);
-    Image & operator = (const Image &rhs);
-    Image & operator = (Image &&rhs);
-    ~Image();
+    Image(int width, int height, int maxGrayVal, unsigned char data[]);     // constructor
+    Image(std::string filename);                // constructor
+    Image(const Image &rhs);                    // copy constructor
+    Image(Image &&rhs);                         // move constructor
+    Image & operator = (const Image &rhs);      // copy assignment operator
+    Image & operator = (Image &&rhs);           // move assignment operator
+    ~Image();                                   // destructor
 
-    Image & operator += (const Image &rhs);
-    friend std::ostream & operator << (std::ostream & os, const Image & image);
+    friend std::ostream & operator << (std::ostream & os, const Image & image);     // input assignment operator
+    friend std::istream & operator >> (std::istream & is, Image & image);           // output assignment operator
+    Image & operator += (const Image &rhs);     // addition assignment operator
 
+    // GETTERS
+    int getWidth();
+    int getHeight();
+    int getSize();
+    int getMaxGrayVal();
+    std::string getFileType();
+
+    // METHODS
     void copy(const Image &rhs);
 
+    // inner iterator class
     class iterator
     {
     private:
@@ -40,10 +51,14 @@ public:
 
         friend class Image;
 
+        // constructor
         iterator(unsigned char *p) : ptr(p) {}
 
     public:
+        // copy constructor
         iterator(const iterator &rhs) : ptr(rhs.ptr) {}
+
+        // copy assignment operator
         iterator & operator = (const iterator &rhs)
         {
             if(this != &rhs)
@@ -54,25 +69,29 @@ public:
             return *this;
         }
 
+        // increment operator
         iterator & operator ++ ()
         {
             ptr += 1;
             return *this;
         }
 
+        // dereferencing operator
         unsigned char & operator * ()
         {
             return *ptr;
         }
 
+        // inequality operator
         bool operator != (const iterator &rhs)
         {
             return ptr != rhs.ptr;
         }
     };
+    // end of inner iterator class
 
+    // iterator access methods
     iterator begin(void) const;
-
     iterator end(void) const;
 };
 

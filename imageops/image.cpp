@@ -5,46 +5,33 @@
 
 namespace global{
 
-Image::Image(int width, int height)
+// constructor (if image properties and data available)
+Image::Image(int width, int height, int maxGrayVal, unsigned char data[])
 {
     this->width = width;
     this->height = height;
     this->size = width*height;
-
-    data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
+    this->maxGrayVal = maxGrayVal;
+    this->data = std::unique_ptr<unsigned char[]>(new unsigned char[size]); // create unique pointer
+    for(int i = 0; i < size; i++) {
+        this->data[i] = data[i];    // assign pointer values from data buffer
+    }
 }
 
+// constructor (if only filename available)
 Image::Image(std::string filename)
 {
     // open file stream in binary mode
     std::ifstream inputFileStream(filename, std::ios::binary);
 
-    // parse file header
-    inputFileStream >> fileType >> std::ws;
-    std::string line; std::getline(inputFileStream, line);
-    inputFileStream >> std::ws;
-    inputFileStream >> height >> width >> maxGrayVal;
-    size = width*height;
-
-    // check data
-    std::cout << "File type: " << fileType << std::endl;
-    std::cout << "Line: " << line << std::endl;
-    std::cout << "Height: " << height << std::endl;
-    std::cout << "Width: " << width << std::endl;
-    std::cout << "Size: " << size << std::endl;
-    std::cout << "Max gray value: " << maxGrayVal << std::endl;
-
-    // parse data values
-    data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
-    for(int i = 0; i < size; i++) {
-        unsigned char chr = inputFileStream.get();
-        data[i] = chr;
-    }
+    // parse file stream into image object
+    inputFileStream >> *this;
 
     // close file stream
     inputFileStream.close();
 }
 
+// copy constructor
 Image::Image(const Image &rhs)
     : fileType(rhs.fileType)
     , width(rhs.width)
@@ -56,6 +43,7 @@ Image::Image(const Image &rhs)
     this->copy(rhs);
 }
 
+// move constructor
 Image::Image(Image &&rhs)
     : fileType(std::move(rhs.fileType))
     , width(std::move(rhs.width))
@@ -65,6 +53,7 @@ Image::Image(Image &&rhs)
     , data(std::move(rhs.data))
 {}
 
+// copy assignment operator
 Image & Image::operator = (const Image &rhs)
 {
     if(this != &rhs)
@@ -75,12 +64,13 @@ Image & Image::operator = (const Image &rhs)
         size = rhs.size;
         maxGrayVal = rhs.maxGrayVal;
         data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
-        this->copy(rhs);
+        this->copy(rhs);    // use copy method to deep copy data
     }
 
     return *this;
 }
 
+// move assignment operator
 Image & Image::operator = (Image &&rhs)
 {
     fileType = std::move(rhs.fileType);
@@ -93,23 +83,68 @@ Image & Image::operator = (Image &&rhs)
     return *this;
 }
 
+// destructor
 Image::~Image()
-{}
-
-Image::iterator Image::begin() const
 {
-    return iterator(data.get());
+    // no need to free memory since unique pointer is being used
 }
 
-Image::iterator Image::end() const
+// input assignment operator (input stream has to be binary for P5)
+std::istream & operator >> (std::istream & is, Image & image)
 {
-    return iterator(data.get()+size-2);
+    // parse file header
+    is >> image.fileType >> std::ws;
+    std::string line; std::getline(is, line);
+    is >> std::ws;
+    is >> image.height >> image.width >> image.maxGrayVal;
+    image.size = image.width*image.height;
+
+    // check data (comment out as necessary)
+    /*
+    std::cout << "File type: " << image.fileType << std::endl;
+    std::cout << "Line: " << line << std::endl;
+    std::cout << "Height: " << image.height << std::endl;
+    std::cout << "Width: " << image.width << std::endl;
+    std::cout << "Size: " << image.size << std::endl;
+    std::cout << "Max gray value: " << image.maxGrayVal << std::endl;
+    //*/
+
+    // parse data values
+    image.data = std::unique_ptr<unsigned char[]>(new unsigned char[image.size]);
+    for(int i = 0; i < image.size; i++) {
+        unsigned char chr = is.get();
+        image.data[i] = chr;
+    }
+
+    return is;
 }
 
+// output assignment operator (output stream has to be binary for P5)
+std::ostream & operator << (std::ostream & os, const Image & image)
+{
+    // write header
+    os << "P5\n" << "#\n" << image.width << " " << image.height << "\n" << image.maxGrayVal << std::endl;
+
+    // write data
+    for(int i = 0; i < image.size; i++) {
+            os << (unsigned char)image.data[i];
+    }
+
+    return os;
+}
+
+// GETTERS
+int Image::getWidth(){return this->width;}
+int Image::getHeight(){return this->height;}
+int Image::getSize(){return this->size;}
+int Image::getMaxGrayVal(){return this->maxGrayVal;}
+std::string Image::getFileType(){return this->fileType;}
+
+// Method to deep copy data from an image object (uses iterators)
 void Image::copy(const Image &rhs)
 {
     Image::iterator beg = this->begin(), end = this->end();
-    Image::iterator inStart = rhs.begin(), inEnd = rhs.end();
+    Image::iterator inStart = rhs.begin();
 
     while(beg != end)
     {
@@ -118,7 +153,7 @@ void Image::copy(const Image &rhs)
     }
 }
 
-//*
+// addition assignment operator
 Image & Image::operator += (const Image &rhs)
 {
     Image::iterator beg = this->begin(), end = this->end();
@@ -133,6 +168,7 @@ Image & Image::operator += (const Image &rhs)
     return *this;
 }
 
+// addition operator (relies on addition assignment operator)
 Image operator + (const Image &rhs, const Image &lhs)
 {
     Image result = lhs;
@@ -148,18 +184,15 @@ Image operator + (const Image &rhs, const Image &lhs)
     return result;
 }
 
-std::ostream & operator << (std::ostream & os, const Image & image)
+// ITERATOR ACCESS METHODS
+Image::iterator Image::begin() const
 {
-    // write header
-    os << "P5\n" << "#\n" << image.width << " " << image.height << "\n" << image.maxGrayVal << std::endl;
-    // write data
-    for(int i = 0; i < image.size; i++) {
-            // print pixel value
-            os << (unsigned char)image.data[i];
-    }
+    return iterator(data.get());
+}
 
-    return os;
+Image::iterator Image::end() const
+{
+    return iterator(data.get()+size-2);
 }
 
 }
-//*/

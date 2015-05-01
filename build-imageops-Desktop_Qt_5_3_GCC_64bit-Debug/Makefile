@@ -426,7 +426,8 @@ compiler_clean:
 
 ####### Compile
 
-main.o: ../imageops/main.cpp 
+main.o: ../imageops/main.cpp ../imageops/image.h \
+		../imageops/catch.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../imageops/main.cpp
 
 image.o: ../imageops/image.cpp ../imageops/image.h
