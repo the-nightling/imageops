@@ -142,7 +142,7 @@ std::istream & operator >> (std::istream & is, Image & image)
 std::ostream & operator << (std::ostream & os, const Image & image)
 {
     // write header
-    os << "P5\n" << "#\n" << image.width << " " << image.height << "\n" << image.maxGrayVal << std::endl;
+    os << "P5\n" << "#\n" << image.height << " " << image.width << "\n" << image.maxGrayVal << std::endl;
 
     // write data
     for(int i = 0; i < image.size; i++) {
